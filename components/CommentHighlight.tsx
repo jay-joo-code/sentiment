@@ -1,17 +1,14 @@
 import {
-  CSSObject,
-  HighlightProps,
-  MantineColor,
-  MantineTheme,
-  Mark,
+  Highlight,
   SharedTextProps,
   Text,
   useMantineTheme,
 } from "@mantine/core"
 import useIsMobile from "hooks/isMobile"
-import React, { Dispatch, SetStateAction, useEffect } from "react"
-import ReactMarkdown from "react-markdown"
-import { highlighter, IHighlightConfig } from "util/highlighter"
+import { useRouter } from "next/router"
+import { Dispatch, SetStateAction, useEffect } from "react"
+import { highlighter } from "util/highlighter"
+import htmlDecode from "util/htmlDecode"
 import { courseKeywords } from "util/redditKeywords"
 
 interface ICommentHighlightProps extends SharedTextProps {
@@ -41,12 +38,8 @@ const CommentHighlight = ({
     setSentiment(sentiment)
   }, [highlightChunks])
 
-  function htmlDecode(input) {
-    var doc = new DOMParser().parseFromString(input, "text/html")
-    return doc.documentElement.textContent
-  }
-
   const isMobile = useIsMobile()
+  const router = useRouter()
 
   return (
     <Text size={isMobile ? "sm" : "md"} {...rest}>
@@ -65,7 +58,17 @@ const CommentHighlight = ({
             {htmlDecode(chunk)}{" "}
           </mark>
         ) : (
-          <span key={i}>{htmlDecode(chunk)}</span>
+          <Highlight
+            highlight={(router?.query?.query as string)?.split(" ") || ""}
+            // highlight={" cs "}
+            component="span"
+            highlightStyles={(theme) => ({
+              backgroundColor: theme.colors.blue[1],
+            })}
+            size={isMobile ? "sm" : "md"}
+          >
+            {htmlDecode(chunk)}
+          </Highlight>
         )
       })}
     </Text>

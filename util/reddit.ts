@@ -10,13 +10,12 @@ export interface IRedditComment {
 }
 
 export const fetchRedditComments = async (query: string) => {
-  courseKeywords[query] = 0
   const allComments: IRedditComment[] = []
 
   const { data } = await api.get(
     `https://www.reddit.com/r/Cornell/search/.json?q=${encodeURIComponent(
       query
-    )}%20NOT%20schedule&limit=30&restrict_sr=1&sr_nsfw=`
+    )}&limit=30&restrict_sr=1&sr_nsfw=`
   )
 
   const recurseReplies = (replies, url, responseTo) => {
@@ -108,6 +107,7 @@ export const fetchRedditComments = async (query: string) => {
     // console.log(hasKeyword, comment.body)
 
     return hasKeyword && comment?.ups > 1
+    // return comment?.ups > 1
   })
 
   filteredComments.sort((commentA, commentB) => commentB?.ups - commentA?.ups)
