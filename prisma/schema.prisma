@@ -84,3 +84,29 @@ model VerificationToken {
   @@unique([identifier, token])
   @@map("verificationtokens")
 }
+
+model RedditComment {
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @map(name: "created_at")
+  body       String
+  responseTo String
+  permalink  String
+  ups        Int
+
+
+  Sentiment   Sentiment? @relation(fields: [sentimentId], references: [id])
+  sentimentId Int?
+  @@map(name: "redditComment")
+}
+
+model Sentiment {
+  id             Int             @id @default(autoincrement())
+  createdAt      DateTime        @default(now()) @map(name: "created_at")
+  updatedAt      DateTime        @updatedAt @map(name: "updated_at")
+  query          String
+  sentimentScore Int
+  topComments    RedditComment[]
+
+
+  @@map(name: "sentiments")
+}
