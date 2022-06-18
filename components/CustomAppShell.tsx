@@ -14,6 +14,7 @@ import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutline
 import ExitToAppOutlinedIcon from "@mui/icons-material/ExitToAppOutlined"
 import LibraryAddCheckOutlinedIcon from "@mui/icons-material/LibraryAddCheckOutlined"
 import ModeEditOutlinedIcon from "@mui/icons-material/ModeEditOutlined"
+import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined"
 import { getSession, signOut, useSession } from "next-auth/react"
 import Link from "next/link"
 import React, { useState } from "react"
@@ -50,45 +51,11 @@ const CustomAppShell = ({ children }: ICustomAppShellProps) => {
         >
           <Navbar.Section grow mt="md">
             <NavItem
-              href="/reddit-opinions"
-              icon={<ChatBubbleOutlineOutlinedIcon />}
-              label="Reddit opinions"
+              href="/"
+              icon={<SearchOutlinedIcon />}
+              label="Browse"
               onClick={() => setOpened(false)}
             />
-            <NavItem
-              href="/todos"
-              icon={<LibraryAddCheckOutlinedIcon />}
-              label="Todos"
-              onClick={() => setOpened(false)}
-            />
-            {session ? (
-              <>
-                <NavItem
-                  href="/drafts"
-                  icon={<ModeEditOutlinedIcon />}
-                  label="Drafts"
-                  onClick={() => setOpened(false)}
-                />
-                <NavItem
-                  href="/create"
-                  icon={<AddCircleOutlineOutlinedIcon />}
-                  label="Add post"
-                  onClick={() => setOpened(false)}
-                />
-                <NavItem
-                  href="/"
-                  icon={<ExitToAppOutlinedIcon />}
-                  label="Sign out"
-                  onClick={() => signOut()}
-                />
-              </>
-            ) : (
-              <NavItem
-                href="/api/auth/signin"
-                icon={<ExitToAppOutlinedIcon />}
-                label="Login"
-              />
-            )}
           </Navbar.Section>
         </Navbar>
       }
@@ -125,7 +92,12 @@ const CustomAppShell = ({ children }: ICustomAppShellProps) => {
             </MediaQuery>
 
             <Link href="/">
-              <Text size="xl" weight={700} color={theme.colors.blue[5]}>
+              <Text
+                size="xl"
+                weight={700}
+                color={theme.colors.blue[5]}
+                style={{ cursor: "pointer" }}
+              >
                 Sentiment
               </Text>
             </Link>
