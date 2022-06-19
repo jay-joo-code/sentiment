@@ -2,6 +2,7 @@ import {
   Badge,
   Box,
   Highlight,
+  Popover,
   Spoiler,
   Text,
   useMantineTheme,
@@ -26,6 +27,7 @@ const CommentItem = ({ comment }: ICommentItemProps) => {
   const theme = useMantineTheme()
   const isMobile = useIsMobile()
   const router = useRouter()
+  const [isPopoverOpened, setIsPopoverOpened] = useState(false)
 
   const signedNumber = (n: string): string => {
     return (Number(n) <= 0 ? "" : "+") + n
@@ -106,9 +108,42 @@ const CommentItem = ({ comment }: ICommentItemProps) => {
       </Spoiler>
 
       <Flex align="center" spacing="sm">
-        <Badge size="sm" color={sentimentColor} style={{ marginLeft: "-4px" }}>
-          {totalSentimentString}
-        </Badge>
+        <Popover
+          opened={isPopoverOpened}
+          onClose={() => setIsPopoverOpened(false)}
+          position="bottom"
+          placement="start"
+          // transition="slide-down"
+          withArrow={false}
+          trapFocus={false}
+          closeOnEscape={false}
+          width={260}
+          styles={{ body: { pointerEvents: "none" } }}
+          target={
+            <Badge
+              size="sm"
+              color={sentimentColor}
+              style={{ marginLeft: "-4px" }}
+              onMouseEnter={() => setIsPopoverOpened(true)}
+              onMouseLeave={() => setIsPopoverOpened(false)}
+            >
+              {totalSentimentString}
+            </Badge>
+          }
+        >
+          <div>
+            <Text size="xs" color="dimmed">
+              <Text size="xs" component="span" color={sentimentColor}>
+                {absoluteSentiment}
+              </Text>{" "}
+              text sentiment x{" "}
+              <Text size="xs" component="span" color="dark">
+                {comment?.ups}
+              </Text>{" "}
+              upvotes
+            </Text>
+          </div>
+        </Popover>
 
         <Text size="xs" color="dimmed">
           {comment?.ups} upvotes • {moment(comment?.createdAt).fromNow()} •{" "}
@@ -122,6 +157,9 @@ const CommentItem = ({ comment }: ICommentItemProps) => {
           </a>
         </Text>
       </Flex>
+      {/* <Text size="xs" color="dimmed" mt="md">
+        {comment?.sentimentScore} score • {comment?.sentimentMagnitude} mag
+      </Text> */}
     </Box>
   )
 }
