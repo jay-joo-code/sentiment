@@ -35,16 +35,16 @@ const CommentItem = ({ comment }: ICommentItemProps) => {
     (comment?.sentimentScore * comment?.sentimentMagnitude)?.toFixed(2)
   )
 
-  const totalSentiment =
+  const totalSentimentString =
     comment?.sentimentScore === 0
       ? "Neutral"
-      : signedNumber(
+      : `${signedNumber(
           (
             comment?.sentimentScore *
             comment?.sentimentMagnitude *
             comment?.ups
-          ).toFixed(2)
-        )
+          ).toFixed(0)
+        )} sentiment`
 
   const sentimentColor =
     comment?.sentimentScore === 0
@@ -98,7 +98,7 @@ const CommentItem = ({ comment }: ICommentItemProps) => {
             fontSize: theme.fontSizes.xs,
           },
         })}
-        mb="md"
+        mb="lg"
       >
         <CommentHighlight setSentiment={setSentiment}>
           {comment?.body}
@@ -106,8 +106,8 @@ const CommentItem = ({ comment }: ICommentItemProps) => {
       </Spoiler>
 
       <Flex align="center" spacing="sm">
-        <Badge size="sm" color={sentimentColor}>
-          {totalSentiment}
+        <Badge size="sm" color={sentimentColor} style={{ marginLeft: "-4px" }}>
+          {totalSentimentString}
         </Badge>
 
         <Text size="xs" color="dimmed">
