@@ -1,9 +1,7 @@
-import type { NextApiRequest, NextApiResponse } from "next"
-import prisma from "../../../lib/prisma"
-import { getSession } from "next-auth/react"
+import { RedditComment } from "@prisma/client"
 import { withSentry } from "@sentry/nextjs"
 import api from "lib/api"
-import { RedditComment } from "@prisma/client"
+import type { NextApiRequest, NextApiResponse } from "next"
 
 async function handle(req: NextApiRequest, res: NextApiResponse) {
   switch (req.method) {
