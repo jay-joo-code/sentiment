@@ -2,6 +2,7 @@ import { Input, Paper } from "@mantine/core"
 import { useDebouncedValue } from "@mantine/hooks"
 import { useRouter } from "next/router"
 import React, { memo, useEffect, useState } from "react"
+import useSWR from "swr"
 
 interface IRedditQueryInputProps {}
 

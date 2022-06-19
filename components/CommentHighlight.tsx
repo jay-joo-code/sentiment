@@ -59,11 +59,12 @@ const CommentHighlight = ({
           </mark>
         ) : (
           <Highlight
+            key={i}
             highlight={(router?.query?.query as string)?.split(" ") || ""}
             // highlight={" cs "}
             component="span"
             highlightStyles={(theme) => ({
-              backgroundColor: theme.colors.blue[1],
+              backgroundColor: theme.colors.blue[0],
             })}
             size={isMobile ? "sm" : "md"}
           >

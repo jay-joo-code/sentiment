@@ -1,6 +1,7 @@
 import { Paper } from "@mantine/core"
 import { useRouter } from "next/router"
 import React, { useEffect, useState } from "react"
+import useSWR from "swr"
 import { fetchRedditComments, IRedditComment } from "util/reddit"
 import CommentItem from "./CommentItem"
 
@@ -8,24 +9,20 @@ interface IRedditSentimentProps {}
 
 const RedditSentiment = ({}: IRedditSentimentProps) => {
   const router = useRouter()
-  const [comments, setComments] = useState<IRedditComment[]>([])
 
-  const fetchComments = async (debouncedQuery: string) => {
-    const comments = await fetchRedditComments(debouncedQuery)
-    setComments(comments)
-  }
+  const { data } = useSWR(
+    router?.query?.query
+      ? `/api/sentiment?query=${router?.query?.query || ""}`
+      : null
+  )
 
-  useEffect(() => {
-    if (router?.query?.query && router?.query?.query?.length > 0) {
-      fetchComments(router?.query?.query as string)
-    }
-  }, [router?.query?.query])
+  console.log("comments", data?.comments)
 
-  if (!comments || comments?.length === 0) return null
+  if (!data?.comments || data?.comments?.length === 0) return null
 
   return (
     <Paper sx={() => ({ maxWidth: "100%" })} mx="0" my="xs">
-      {comments?.map((comment) => (
+      {data?.comments?.map((comment) => (
         <CommentItem key={comment?.permalink} comment={comment} />
       ))}
     </Paper>

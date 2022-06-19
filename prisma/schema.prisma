@@ -86,13 +86,14 @@ model VerificationToken {
 }
 
 model RedditComment {
-  id         Int      @id @default(autoincrement())
-  createdAt  DateTime @map(name: "created_at")
-  body       String
-  responseTo String
-  permalink  String
-  ups        Int
-
+  id                 Int      @id @default(autoincrement())
+  createdAt          DateTime @map(name: "created_at")
+  body               String
+  responseTo         String
+  permalink          String
+  ups                Int
+  sentimentScore     Int
+  sentimentMagnitude Int
 
   Sentiment   Sentiment? @relation(fields: [sentimentId], references: [id])
   sentimentId Int?
@@ -100,12 +101,13 @@ model RedditComment {
 }
 
 model Sentiment {
-  id             Int             @id @default(autoincrement())
-  createdAt      DateTime        @default(now()) @map(name: "created_at")
-  updatedAt      DateTime        @updatedAt @map(name: "updated_at")
-  query          String
-  sentimentScore Int
-  topComments    RedditComment[]
+  id                 Int             @id @default(autoincrement())
+  createdAt          DateTime        @default(now()) @map(name: "created_at")
+  updatedAt          DateTime        @updatedAt @map(name: "updated_at")
+  query              String
+  sentimentScore     Int
+  sentimentMagnitude Int
+  topComments        RedditComment[]
 
 
   @@map(name: "sentiments")

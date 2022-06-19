@@ -1,6 +1,9 @@
 import Flex from "components/Flex"
 import RedditQueryInput from "components/RedditQueryInput"
 import RedditSentiment from "components/RedditSentiment"
+import api from "lib/api"
+import { useEffect } from "react"
+import useSWR from "swr"
 
 const RedditOpinions = () => {
   return (

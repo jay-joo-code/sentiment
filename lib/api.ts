@@ -11,7 +11,6 @@ api.interceptors.response.use(
       message: error?.response?.data?.message,
       color: "red",
     })
-    throw error
   }
 )
 
