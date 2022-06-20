@@ -1,43 +1,46 @@
-import { Input, Paper } from "@mantine/core"
-import { useDebouncedValue } from "@mantine/hooks"
+import { Button, Input, Paper } from "@mantine/core"
 import { useRouter } from "next/router"
-import React, { memo, useEffect, useState } from "react"
-import useSWR from "swr"
+import { memo, useState } from "react"
+import Flex from "./Flex"
 
-interface IRedditQueryInputProps {}
-
-const RedditQueryInput = ({}: IRedditQueryInputProps) => {
+const RedditQueryInput = () => {
   const [query, setQuery] = useState<string>()
-  const [isRefreshed, setIsRefreshed] = useState<boolean>(false)
-
-  const [debouncedQuery] = useDebouncedValue(query, 500)
   const router = useRouter()
 
-  useEffect(() => {
-    if (debouncedQuery !== undefined) {
+  const handleSearch = () => {
+    router.push(
+      {
+        query: { query },
+      },
+      undefined,
+      { shallow: true }
+    )
+  }
+
+  const handleEnterKeyDown = (event) => {
+    if (event.key === "Enter") {
       router.push(
         {
-          query: { query: debouncedQuery },
+          query: { query },
         },
         undefined,
         { shallow: true }
       )
     }
-  }, [debouncedQuery])
-
-  useEffect(() => {
-    if (!isRefreshed && router?.query?.query !== undefined) {
-      setQuery(router?.query?.query as string)
-      setIsRefreshed(true)
-    }
-  }, [router?.query?.query])
+  }
 
   return (
-    <div>
-      <Paper sx={() => ({ maxWidth: "100%" })} mx="0" my="xs">
-        <Input value={query || ""} onChange={(e) => setQuery(e.target.value)} />
-      </Paper>
-    </div>
+    <Paper sx={() => ({ maxWidth: "100%" })} mx="0" my="xs">
+      <Flex align="center">
+        <Input
+          value={query || ""}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={handleEnterKeyDown}
+          sx={() => ({ flexGrow: 1 })}
+        />
+        <Button onClick={handleSearch}>Search</Button>
+      </Flex>
+    </Paper>
   )
 }
 
