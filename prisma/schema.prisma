@@ -92,23 +92,23 @@ model RedditComment {
   responseTo         String
   permalink          String
   ups                Int
-  sentimentScore     Int
-  sentimentMagnitude Int
+  sentimentScore     Decimal
+  sentimentMagnitude Decimal
 
-  Sentiment   Sentiment? @relation(fields: [sentimentId], references: [id])
-  sentimentId Int?
-  @@map(name: "redditComment")
+  Topic   Topic @relation(fields: [topicId], references: [id])
+  topicId Int
+  @@map(name: "redditComments")
 }
 
-model Sentiment {
+model Topic {
   id                 Int             @id @default(autoincrement())
   createdAt          DateTime        @default(now()) @map(name: "created_at")
   updatedAt          DateTime        @updatedAt @map(name: "updated_at")
-  query              String
-  sentimentScore     Int
-  sentimentMagnitude Int
+  name               String
+  sentimentScore     Decimal
+  sentimentMagnitude Decimal
   topComments        RedditComment[]
 
 
-  @@map(name: "sentiments")
+  @@map(name: "topics")
 }

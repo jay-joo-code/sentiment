@@ -1,6 +1,7 @@
-import { RedditComment } from "@prisma/client"
+import { Prisma, RedditComment } from "@prisma/client"
 import { withSentry } from "@sentry/nextjs"
 import api from "lib/api"
+import prisma from "lib/prisma"
 import type { NextApiRequest, NextApiResponse } from "next"
 
 async function handle(req: NextApiRequest, res: NextApiResponse) {
@@ -11,27 +12,48 @@ async function handle(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .send({ message: "Enter a keyword to start the sentiment analysis" })
       }
+      const query = (req?.query?.query as string)?.trim()
 
-      const comments = await fetchRedditComments(req?.query?.query as string)
+      // TODO: gather new sentiemt if most recent sentiment was gathered x months ago
 
-      // sort by total sentiment score
-      comments?.sort((commentA, commentB) => {
-        const scoreA = Math.abs(
-          commentA?.sentimentScore *
-            commentA?.sentimentMagnitude *
-            commentA?.ups
-        )
-
-        const scoreB = Math.abs(
-          commentB?.sentimentScore *
-            commentB?.sentimentMagnitude *
-            commentB?.ups
-        )
-
-        return scoreB - scoreA
+      let topic = await prisma.topic.findFirst({
+        where: {
+          name: query,
+        },
+        include: {
+          topComments: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
       })
 
-      res.json({ comments })
+      if (!topic) {)
+        await fetchTopic(query)
+        topic = await prisma.topic.findFirst({
+          where: {
+            name: query,
+          },
+          include: {
+            topComments: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        })
+      }
+
+      topic?.topComments?.sort((a, b) => {
+        const sentiA = Math.abs(
+          Number(a.sentimentScore) * Number(a.sentimentMagnitude) * a.ups
+        )
+        const sentiB = Math.abs(
+          Number(b.sentimentScore) * Number(b.sentimentMagnitude) * b.ups
+        )
+        return sentiB - sentiA
+      })
+      res.json(topic)
+
       break
 
     case "POST":
@@ -43,9 +65,12 @@ async function handle(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-type RawComment = Omit<RedditComment, "id" | "sentimentId">
+type RawComment = Omit<
+  RedditComment,
+  "id" | "topicId" | "sentimentScore" | "sentimentMagnitude"
+>
 
-const fetchSentiment = async (content: string) => {
+const fetchGoogleSentiment = async (content: string) => {
   const URL = `https://language.googleapis.com/v1/documents:analyzeSentiment?key=${process.env.GOOGLE_API_KEY}`
 
   const { data } = await api.post(URL, {
@@ -90,15 +115,12 @@ const recurseReplies = (
       permalink: reply?.data?.permalink,
       ups: reply?.data?.ups,
       createdAt,
-      sentimentScore: 0,
-      sentimentMagnitude: 0,
     })
     recurseReplies(allComments, reply?.data?.replies, url, reply?.data?.body)
   })
 }
 
-const fetchRedditComments = async (query: string) => {
-  console.log("query", query)
+const fetchTopic = async (query: string) => {
   const allComments: RawComment[] = []
 
   const { data } = await api.get(
@@ -123,8 +145,6 @@ const fetchRedditComments = async (query: string) => {
       permalink: rootPost?.permalink,
       ups: rootPost?.ups,
       createdAt,
-      sentimentScore: 0,
-      sentimentMagnitude: 0,
     })
 
     if (postData && postData?.length >= 2) {
@@ -146,8 +166,6 @@ const fetchRedditComments = async (query: string) => {
           permalink: comment?.data?.permalink,
           ups: comment?.data?.ups,
           createdAt,
-          sentimentScore: 0,
-          sentimentMagnitude: 0,
         })
         recurseReplies(
           allComments,
@@ -183,12 +201,34 @@ const fetchRedditComments = async (query: string) => {
     ?.sort((commentA, commentB) => commentB?.ups - commentA?.ups)
     ?.slice(0, 10)
 
+  const topic = await prisma.topic.create({
+    data: {
+      name: query,
+      sentimentScore: 0,
+      sentimentMagnitude: 0,
+    },
+  })
+
   // fetch sentiment data
-  const sentimentPromises = bestComments?.map(async (comment) => {
+  let topicSentimentScore = 0
+  let topicSentimentMagnitude = 0
+
+  const saveCommentsPromises = bestComments?.map(async (comment) => {
     const content = `${comment?.responseTo}. ${comment?.body}`
-    const { documentSentiment } = await fetchSentiment(content)
-    comment.sentimentScore = documentSentiment?.score
-    comment.sentimentMagnitude = documentSentiment?.magnitude
+
+    const { documentSentiment } = await fetchGoogleSentiment(content)
+
+    topicSentimentScore += documentSentiment?.score
+    topicSentimentMagnitude += documentSentiment?.magnitude
+
+    const commentRecord = await prisma.redditComment.create({
+      data: {
+        ...comment,
+        topicId: topic.id,
+        sentimentScore: new Prisma.Decimal(documentSentiment?.score),
+        sentimentMagnitude: new Prisma.Decimal(documentSentiment?.magnitude),
+      },
+    })
 
     // view comment sentiment logs
     // console.log("")
@@ -228,12 +268,22 @@ const fetchRedditComments = async (query: string) => {
     //   return isRelatedEntity
     // })
 
-    return comment
+    return commentRecord
   })
 
-  const populatedComments = await Promise.all(sentimentPromises)
+  await Promise.all(saveCommentsPromises)
 
-  return populatedComments
+  await prisma.topic.update({
+    where: {
+      id: topic.id,
+    },
+    data: {
+      sentimentScore: topicSentimentScore,
+      sentimentMagnitude: topicSentimentMagnitude,
+    },
+  })
+
+  return topic
 }
 
 export default withSentry(handle)

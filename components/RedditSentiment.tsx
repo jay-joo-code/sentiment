@@ -16,11 +16,11 @@ const RedditSentiment = ({}: IRedditSentimentProps) => {
       : null
   )
 
-  if (!data?.comments || data?.comments?.length === 0) return null
+  if (!data?.topComments || data?.topComments?.length === 0) return null
 
   return (
     <Paper sx={() => ({ maxWidth: "100%" })} mx="0" my="xs">
-      {data?.comments?.map((comment) => (
+      {data?.topComments?.map((comment) => (
         <CommentItem key={comment?.permalink} comment={comment} />
       ))}
     </Paper>
