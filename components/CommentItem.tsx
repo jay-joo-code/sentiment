@@ -1,32 +1,26 @@
 import {
   Badge,
   Box,
-  Highlight,
   Popover,
   Spoiler,
   Text,
   useMantineTheme,
 } from "@mantine/core"
+import { RedditComment } from "@prisma/client"
 import useIsMobile from "hooks/isMobile"
 import moment from "moment"
-import { useRouter } from "next/router"
 import { useState } from "react"
 import htmlDecode from "util/htmlDecode"
-import { IRedditComment } from "util/reddit"
 import CommentHighlight from "./CommentHighlight"
-import ArrowRightOutlinedIcon from "@mui/icons-material/ArrowRightOutlined"
 import Flex from "./Flex"
-import { RedditComment } from "@prisma/client"
 
 interface ICommentItemProps {
   comment: RedditComment
 }
 
 const CommentItem = ({ comment }: ICommentItemProps) => {
-  const [sentiment, setSentiment] = useState<number>(0)
   const theme = useMantineTheme()
   const isMobile = useIsMobile()
-  const router = useRouter()
   const [isPopoverOpened, setIsPopoverOpened] = useState(false)
 
   const signedNumber = (n: string): string => {
@@ -35,26 +29,25 @@ const CommentItem = ({ comment }: ICommentItemProps) => {
 
   const absoluteSentiment = signedNumber(
     (
-      comment?.sentimentScore?.toNumber() *
-      comment?.sentimentMagnitude?.toNumber()
+      Number(comment?.sentimentScore) * Number(comment?.sentimentMagnitude)
     )?.toFixed(2)
   )
 
   const totalSentimentString =
-    comment?.sentimentScore?.toNumber() === 0
+    Number(comment?.sentimentScore) === 0
       ? "Neutral"
       : `${signedNumber(
           (
-            comment?.sentimentScore?.toNumber() *
-            comment?.sentimentMagnitude?.toNumber() *
+            Number(comment?.sentimentScore) *
+            Number(comment?.sentimentMagnitude) *
             comment?.ups
           ).toFixed(0)
         )} sentiment`
 
   const sentimentColor =
-    comment?.sentimentScore?.toNumber() === 0
+    Number(comment?.sentimentScore) === 0
       ? "gray"
-      : comment?.sentimentScore?.toNumber() < 0
+      : Number(comment?.sentimentScore) < 0
       ? "red"
       : "green"
 
@@ -94,9 +87,7 @@ const CommentItem = ({ comment }: ICommentItemProps) => {
         })}
         mb="lg"
       >
-        <CommentHighlight setSentiment={setSentiment}>
-          {comment?.body}
-        </CommentHighlight>
+        <CommentHighlight>{comment?.body}</CommentHighlight>
       </Spoiler>
 
       <Flex align="center" spacing="sm">
@@ -149,9 +140,6 @@ const CommentItem = ({ comment }: ICommentItemProps) => {
           </a>
         </Text>
       </Flex>
-      {/* <Text size="xs" color="dimmed" mt="md">
-        {comment?.sentimentScore?.toNumber()} score • {comment?.sentimentMagnitude?.toNumber()} mag
-      </Text> */}
     </Box>
   )
 }
