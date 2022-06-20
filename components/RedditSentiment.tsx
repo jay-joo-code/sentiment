@@ -16,8 +16,6 @@ const RedditSentiment = ({}: IRedditSentimentProps) => {
       : null
   )
 
-  console.log("comments", data?.comments)
-
   if (!data?.comments || data?.comments?.length === 0) return null
 
   return (

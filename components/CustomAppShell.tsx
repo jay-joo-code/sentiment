@@ -95,8 +95,10 @@ const CustomAppShell = ({ children }: ICustomAppShellProps) => {
               <Text
                 size="xl"
                 weight={700}
-                color={theme.colors.blue[5]}
+                // color={theme.colors.blue[5]}
                 style={{ cursor: "pointer" }}
+                variant="gradient"
+                gradient={{ from: "blue", to: "cyan", deg: 45 }}
               >
                 Sentiment
               </Text>

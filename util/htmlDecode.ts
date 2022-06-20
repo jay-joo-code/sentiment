@@ -1,4 +1,4 @@
 export default function htmlDecode(input) {
   var doc = new DOMParser().parseFromString(input, "text/html")
-  return doc.documentElement.textContent
+  return doc.documentElement.lastChild.textContent
 }

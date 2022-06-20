@@ -14,6 +14,23 @@ async function handle(req: NextApiRequest, res: NextApiResponse) {
 
       const comments = await fetchRedditComments(req?.query?.query as string)
 
+      // sort by total sentiment score
+      comments?.sort((commentA, commentB) => {
+        const scoreA = Math.abs(
+          commentA?.sentimentScore *
+            commentA?.sentimentMagnitude *
+            commentA?.ups
+        )
+
+        const scoreB = Math.abs(
+          commentB?.sentimentScore *
+            commentB?.sentimentMagnitude *
+            commentB?.ups
+        )
+
+        return scoreB - scoreA
+      })
+
       res.json({ comments })
       break
 
@@ -144,7 +161,7 @@ const fetchRedditComments = async (query: string) => {
 
   await Promise.all(promises)
 
-  // filter by query
+  // filter comments that include query
   const filteredComments = allComments?.filter((comment) => {
     const matcher = query
       ?.split(" ")
@@ -153,9 +170,12 @@ const fetchRedditComments = async (query: string) => {
       .join("|")
 
     const re = new RegExp(`\\b(${matcher})\\b`, "gi")
-    const isIncludesQuery = re.test(comment?.body)
+    const isBodyIncludesQuery = re.test(comment?.body)
+    const isResponseToIncludesQuery = re.test(comment?.responseTo)
 
-    return isIncludesQuery && comment?.ups > 1
+    return (
+      (isBodyIncludesQuery || isResponseToIncludesQuery) && comment?.ups > 1
+    )
   })
 
   // filter 10 most upvoted comments
@@ -164,7 +184,6 @@ const fetchRedditComments = async (query: string) => {
     ?.slice(0, 10)
 
   // fetch sentiment data
-
   const sentimentPromises = bestComments?.map(async (comment) => {
     const content = `${comment?.responseTo}. ${comment?.body}`
     const { documentSentiment } = await fetchSentiment(content)
@@ -178,7 +197,7 @@ const fetchRedditComments = async (query: string) => {
     // console.log(content)
     // console.log("documentSentiment", documentSentiment)
 
-    // entity sentiment filter logic
+    // sentiment entity filter logic
     // const filteredEntities = entities?.filter(({ name, sentiment }) => {
     //   const matcher = query
     //     ?.toLowerCase()

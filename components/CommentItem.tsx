@@ -64,32 +64,9 @@ const CommentItem = ({ comment }: ICommentItemProps) => {
       sx={(theme) => ({ borderBottom: `1px solid ${theme.colors.gray[2]}` })}
     >
       {comment?.responseTo && (
-        <Highlight
-          highlight={(router?.query?.query as string)?.split(" ") || ""}
-          highlightStyles={(theme) => ({
-            backgroundColor: theme.colors.blue[0],
-          })}
-          size={isMobile ? "xs" : "sm"}
-          color="dimmed"
-          sx={() => ({
-            // whiteSpace: "nowrap",
-            textOverflow: "ellipsis",
-            overflow: "hidden",
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-          })}
-          my="sm"
-        >
+        <Text size={isMobile ? "xs" : "sm"} color="dimmed" my="sm">
           {`Re: ${htmlDecode(comment?.responseTo)}`}
-          {/* <a
-          href={`https://www.reddit.com${comment?.permalink}`}
-          style={{ color: theme.colors.gray[6] }}
-          target="_blank"
-          rel="noreferrer"
-        >
-        </a> */}
-        </Highlight>
+        </Text>
       )}
       <Spoiler
         maxHeight={isMobile ? 110 : 128}
