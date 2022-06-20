@@ -64,7 +64,19 @@ const CommentItem = ({ comment }: ICommentItemProps) => {
       sx={(theme) => ({ borderBottom: `1px solid ${theme.colors.gray[2]}` })}
     >
       {comment?.responseTo && (
-        <Text size={isMobile ? "xs" : "sm"} color="dimmed" my="sm">
+        <Text
+          size={isMobile ? "xs" : "sm"}
+          color="dimmed"
+          my="sm"
+          sx={() => ({
+            // whiteSpace: "nowrap",
+            textOverflow: "ellipsis",
+            overflow: "hidden",
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+          })}
+        >
           {`Re: ${htmlDecode(comment?.responseTo)}`}
         </Text>
       )}
