@@ -28,7 +28,7 @@ async function handle(req: NextApiRequest, res: NextApiResponse) {
         },
       })
 
-      if (!topic) {)
+      if (!topic) {
         await fetchTopic(query)
         topic = await prisma.topic.findFirst({
           where: {

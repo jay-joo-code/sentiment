@@ -34,24 +34,27 @@ const CommentItem = ({ comment }: ICommentItemProps) => {
   }
 
   const absoluteSentiment = signedNumber(
-    (comment?.sentimentScore * comment?.sentimentMagnitude)?.toFixed(2)
+    (
+      comment?.sentimentScore?.toNumber() *
+      comment?.sentimentMagnitude?.toNumber()
+    )?.toFixed(2)
   )
 
   const totalSentimentString =
-    comment?.sentimentScore === 0
+    comment?.sentimentScore?.toNumber() === 0
       ? "Neutral"
       : `${signedNumber(
           (
-            comment?.sentimentScore *
-            comment?.sentimentMagnitude *
+            comment?.sentimentScore?.toNumber() *
+            comment?.sentimentMagnitude?.toNumber() *
             comment?.ups
           ).toFixed(0)
         )} sentiment`
 
   const sentimentColor =
-    comment?.sentimentScore === 0
+    comment?.sentimentScore?.toNumber() === 0
       ? "gray"
-      : comment?.sentimentScore < 0
+      : comment?.sentimentScore?.toNumber() < 0
       ? "red"
       : "green"
 
@@ -147,7 +150,7 @@ const CommentItem = ({ comment }: ICommentItemProps) => {
         </Text>
       </Flex>
       {/* <Text size="xs" color="dimmed" mt="md">
-        {comment?.sentimentScore} score • {comment?.sentimentMagnitude} mag
+        {comment?.sentimentScore?.toNumber()} score • {comment?.sentimentMagnitude?.toNumber()} mag
       </Text> */}
     </Box>
   )
