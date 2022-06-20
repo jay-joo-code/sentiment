@@ -1,5 +1,6 @@
 import {
   AppShell,
+  Box,
   Burger,
   Group,
   Header,
@@ -15,6 +16,7 @@ import ExitToAppOutlinedIcon from "@mui/icons-material/ExitToAppOutlined"
 import LibraryAddCheckOutlinedIcon from "@mui/icons-material/LibraryAddCheckOutlined"
 import ModeEditOutlinedIcon from "@mui/icons-material/ModeEditOutlined"
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined"
+import useIsMobile from "hooks/isMobile"
 import { getSession, signOut, useSession } from "next-auth/react"
 import Link from "next/link"
 import React, { useState } from "react"
@@ -27,27 +29,34 @@ interface ICustomAppShellProps {
 const CustomAppShell = ({ children }: ICustomAppShellProps) => {
   const theme = useMantineTheme()
   const [opened, setOpened] = useState<boolean>(false)
-  const { data: session } = useSession()
+  const isMobile = useIsMobile()
+  const navbarProps = isMobile
+    ? {}
+    : {
+        fixed: true,
+        position: { top: 100, left: 80 },
+        sx: (theme) => ({
+          [`@media (min-width: ${theme.breakpoints.xs}px)`]: {
+            borderRadius: "10px",
+            height: "auto",
+            minHeight: "30vh",
+          },
+        }),
+      }
 
   return (
     <AppShell
-      styles={{
-        main: {
-          background:
-            theme.colorScheme === "dark"
-              ? theme.colors.dark[8]
-              : theme.colors.gray[0],
-        },
-      }}
-      navbarOffsetBreakpoint="sm"
-      asideOffsetBreakpoint="sm"
-      fixed
+      sx={(theme) => ({})}
+      navbarOffsetBreakpoint="xs"
+      asideOffsetBreakpoint="xs"
+      // fixed
       navbar={
         <Navbar
           p="md"
-          hiddenBreakpoint="sm"
+          hiddenBreakpoint="xs"
           hidden={!opened}
           width={{ sm: 240 }}
+          {...navbarProps}
         >
           <Navbar.Section grow mt="md">
             <NavItem
@@ -59,26 +68,31 @@ const CustomAppShell = ({ children }: ICustomAppShellProps) => {
           </Navbar.Section>
         </Navbar>
       }
-      // aside={
-      //   <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
-      //     <Aside p="md" hiddenBreakpoint="sm" width={{ sm: 200, lg: 300 }}>
-      //       <Text>Application sidebar</Text>
-      //     </Aside>
-      //   </MediaQuery>
-      // }
-      // footer={
-      //   <Footer height={60} p="md">
-      //     Application footer
-      //   </Footer>
-      // }
       header={
         <Header
           height={54}
-          px="lg"
-          py="sm"
-          style={{ display: "flex", alignItems: "center" }}
+          sx={(theme) => ({
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          })}
         >
-          <Group spacing="sm">
+          <Group
+            spacing="sm"
+            // px="lg"
+            py="sm"
+            sx={(theme) => ({
+              width: "100%",
+              paddingLeft: theme.spacing.lg,
+              paddingRight: theme.spacing.lg,
+
+              [`@media (min-width: ${theme.breakpoints.xs}px)`]: {
+                width: "80vw",
+                paddingLeft: 0,
+                paddingRight: 0,
+              },
+            })}
+          >
             <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
               <Space pl="sm" />
             </MediaQuery>
@@ -107,7 +121,15 @@ const CustomAppShell = ({ children }: ICustomAppShellProps) => {
         </Header>
       }
     >
-      {children}
+      <Box
+        sx={(theme) => ({
+          [`@media (min-width: ${theme.breakpoints.xs}px)`]: {
+            maxWidth: "80vh",
+          },
+        })}
+      >
+        {children}
+      </Box>
     </AppShell>
   )
 }
