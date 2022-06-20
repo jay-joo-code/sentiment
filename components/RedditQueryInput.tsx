@@ -1,11 +1,20 @@
-import { Button, Input, Paper } from "@mantine/core"
+import { ActionIcon, Button, Input, Paper } from "@mantine/core"
 import { useRouter } from "next/router"
-import { memo, useState } from "react"
+import { memo, useEffect, useState } from "react"
 import Flex from "./Flex"
+import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined"
 
 const RedditQueryInput = () => {
   const [query, setQuery] = useState<string>()
   const router = useRouter()
+  const [isRefreshed, setIsRefreshed] = useState<boolean>(false)
+
+  useEffect(() => {
+    if (!isRefreshed && router?.query?.query !== undefined) {
+      setQuery(router?.query?.query as string)
+      setIsRefreshed(true)
+    }
+  }, [router?.query?.query])
 
   const handleSearch = () => {
     router.push(
@@ -36,9 +45,14 @@ const RedditQueryInput = () => {
           value={query || ""}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleEnterKeyDown}
-          sx={() => ({ flexGrow: 1 })}
+          sx={() => ({ flexGrow: 1, flexShrink: 1 })}
+          placeholder="Topic"
+          rightSection={
+            <ActionIcon color="blue" variant="light">
+              <SearchOutlinedIcon onClick={handleSearch} />
+            </ActionIcon>
+          }
         />
-        <Button onClick={handleSearch}>Search</Button>
       </Flex>
     </Paper>
   )
